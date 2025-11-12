@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { FcGoogle } from "react-icons/fc";
 import {
@@ -34,6 +34,33 @@ export default function SignUpModal({
   const [emailErr, setEmailErr] = useState("");
   const [passwordErr, setPasswordErr] = useState("");
   const [formErr, setFormErr] = useState("");
+  const [submittingGoogle, setSubmittingGoogle] = useState(false);
+  const [googleErr, setGoogleErr] = useState("");
+
+  const handleGoogleSignUp = async () => {
+    setGoogleErr("");
+    try {
+      setSubmittingGoogle(true);
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      await signInWithPopup(auth, provider);
+      onOpenChange(false);
+      router.push("/for-you");
+    } catch (e: unknown) {
+      if (e instanceof FirebaseError) {
+        const code = e.code;
+        if (code === "auth/popup-closed-by-user") setGoogleErr("Popup closed before completing sign up.");
+        else if (code === "auth/account-exists-with-different-credential") setGoogleErr("Email already used with another sign-in method. Please log in with that method.");
+        else if (code === "auth/popup-blocked") setGoogleErr("Popup was blocked. Please allow popups and try again.");
+        else if (code === "auth/cancelled-popup-request") setGoogleErr("Popup canceled. Try again.");
+        else setGoogleErr("Unable to sign up with Google. Please try again.");
+      } else {
+        setGoogleErr("Unexpected error. Please try again.");
+      }
+    } finally {
+      setSubmittingGoogle(false);
+    }
+  };
 
   const handleSignUp = async () => {
     setEmailErr("");
@@ -91,12 +118,15 @@ export default function SignUpModal({
         <div className="px-6 pb-6">
           <Button
             type="button"
-            className="w-full h-11 rounded-md bg-[#3B82F6] hover:bg-[#2F6FD6] text-white font-medium flex items-center justify-center gap-3"
+            onClick={handleGoogleSignUp}
+            disabled={submittingGoogle}
+            className="w-full h-11 rounded-md bg-[#3B82F6] hover:bg-[#2F6FD6] text-white font-medium flex items-center justify-center gap-3 disabled:opacity-70"
             variant="default"
           >
             <FcGoogle className="text-xl bg-white rounded-[2px]" />
-            <span>Sign up with Google</span>
+            <span>{submittingGoogle ? "Signing up..." : "Sign up with Google"}</span>
           </Button>
+          {googleErr && <p className="mt-2 text-sm text-red-600 text-center">{googleErr}</p>}
 
           <div className="my-4 flex items-center gap-3">
             <span className="h-px flex-1 bg-zinc-200" />
