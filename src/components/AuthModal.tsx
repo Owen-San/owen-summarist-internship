@@ -46,7 +46,7 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
       setSubmittingGuest(true);
       await signInAnonymously(auth);
       onOpenChange(false);
-      router.push("/for-you");
+      router.push("/foryou");
     } catch {
       setFormErr("Guest login failed. Please try again.");
     } finally {
@@ -72,7 +72,7 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
       setSubmittingLogin(true);
       await signInWithEmailAndPassword(auth, email.trim(), password);
       onOpenChange(false);
-      router.push("/for-you");
+      router.push("/foryou");
     } catch (e: unknown) {
       if (e instanceof FirebaseError) {
         const code = e.code;
@@ -97,7 +97,7 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
       provider.setCustomParameters({ prompt: "select_account" });
       await signInWithPopup(auth, provider);
       onOpenChange(false);
-      router.push("/for-you");
+      router.push("/foryou");
     } catch (e: unknown) {
       if (e instanceof FirebaseError) {
         const code = e.code;
@@ -121,12 +121,6 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
           className="gap-0 p-0 sm:max-w-[420px] rounded-xl"
           aria-describedby={undefined}
         >
-          <DialogClose
-            className="absolute right-4 top-4 text-zinc-500 hover:text-zinc-700"
-            aria-label="Close"
-          >
-            ✕
-          </DialogClose>
 
           <DialogHeader className="px-6 pt-8 pb-4">
             <DialogTitle className="text-center text-[20px] font-semibold text-[#032B41]">

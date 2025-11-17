@@ -45,7 +45,7 @@ export default function SignUpModal({
       provider.setCustomParameters({ prompt: "select_account" });
       await signInWithPopup(auth, provider);
       onOpenChange(false);
-      router.push("/for-you");
+      router.push("/foryou");
     } catch (e: unknown) {
       if (e instanceof FirebaseError) {
         const code = e.code;
@@ -80,7 +80,7 @@ export default function SignUpModal({
       setSubmitting(true);
       await createUserWithEmailAndPassword(auth, email.trim(), password);
       onOpenChange(false);
-      router.push("/for-you");
+      router.push("/foryou");
     } catch (e: unknown) {
       if (e instanceof FirebaseError) {
         const code = e.code;

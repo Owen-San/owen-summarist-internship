@@ -591,6 +591,8 @@
   .footer__top--wrapper {
     flex-direction: column;
     gap: 32px;
+    align-items: center;
+    text-align: center;
   }
 
   .numbers__wrapper {
