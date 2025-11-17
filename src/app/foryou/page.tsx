@@ -189,8 +189,7 @@ const suggested: Book[] = [
     id: "6ctat6ynzqp",
     title: "The 5 Second Rule",
     author: "Mel Robbins",
-    subtitle:
-      "Transform Your Life, Work, and Confidence with Everyday Courage",
+    subtitle: "Transform Your Life, Work, and Confidence with Everyday Courage",
     image:
       "https://firebasestorage.googleapis.com/v0/b/summaristt.appspot.com/o/books%2Fimages%2Fthe-five-second-rule.png?alt=media&token=8d6d24fd-11c8-425d-b7f0-3ae1499192db",
     duration: "02:45",
@@ -229,138 +228,182 @@ const suggested: Book[] = [
 
 export default function ForYouPage() {
   return (
-    <div className="min-h-screen bg-white text-[#0f2a37]">
-      <header className="sticky top-0 z-30 bg-white border-b border-zinc-200">
-        <div className="mx-auto max-w-[980px] px-6 py-4 flex items-center gap-3">
-          <div className="relative flex-1">
-            <input
-              placeholder="Search for books"
-              className="w-full h-10 rounded-md border border-zinc-300 pl-4 pr-10 outline-none"
-            />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500">
-              <svg viewBox="0 0 1024 1024" width="18" height="18">
-                <path
-                  d="M909.6 854.5 649.9 594.8C690.2 542.7 712 479 712 412c0-80.2-31.3-155.4-87.9-212.1C567.5 143.2 492.1 112 412 112s-155.5 31.3-212.1 87.9C143.2 256.5 112 331.8 112 412s31.3 155.5 87.9 212.1C256.5 680.8 331.8 712 412 712c67 0 130.6-21.8 182.7-62l259.7 259.6a8.2 8.2 0 0 0 11.6 0l43.6-43.5a8.2 8.2 0 0 0 0-11.6zM570.4 570.4C528 612.7 471.8 636 412 636s-116-23.3-158.4-65.6C211.3 528 188 471.8 188 412s23.3-116.1 65.6-158.4C296 211.3 352.2 188 412 188s116.1 23.2 158.4 65.6S636 352.2 636 412s-23.3 116.1-65.6 158.4z"
-                  fill="currentColor"
-                />
-              </svg>
-            </span>
+    <main className="mx-auto max-w-[980px] px-6 py-8 space-y-10">
+      <section>
+        <h2 className="text-[22px] font-semibold text-[#0f2a37] mb-4">
+          Selected just for you
+        </h2>
+        <Link
+          href={`/book/${selected.id}`}
+          className="block rounded-md bg-[#fdecc8] p-6"
+        >
+          <div className="mb-4 text-[15px] text-[#0f2a37]">
+            {selected.subtitle}
           </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-[980px] px-6 py-8 space-y-10">
-        <section>
-          <h2 className="text-[22px] font-semibold text-[#0f2a37] mb-4">Selected just for you</h2>
-          <Link href={`/book/${selected.id}`} className="block rounded-md bg-[#fdecc8] p-6">
-            <div className="mb-4 text-[15px] text-[#0f2a37]">{selected.subtitle}</div>
-            <div className="mb-4 h-px bg-[#e6cfa5]" />
-            <div className="flex items-center gap-6">
-              <div className="relative h-[140px] w-[140px] shrink-0">
-                <Image src={selected.image} alt="book" fill sizes="140px" className="object-contain" />
+          <div className="mb-4 h-px bg-[#e6cfa5]" />
+          <div className="flex items-center gap-6">
+            <div className="relative h-[140px] w-[140px] shrink-0">
+              <Image
+                src={selected.image}
+                alt="book"
+                fill
+                sizes="140px"
+                className="object-contain"
+              />
+            </div>
+            <div className="flex-1">
+              <div className="text-[18px] font-semibold leading-tight">
+                {selected.title}
               </div>
-              <div className="flex-1">
-                <div className="text-[18px] font-semibold leading-tight">{selected.title}</div>
-                <div className="text-[14px] text-[#0f2a37]/70">{selected.author}</div>
-                <div className="mt-3 flex items-center gap-2 text-[14px]">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-black text-white">
-                    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-                      <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z" />
-                    </svg>
-                  </span>
-                  <span className="text-[#0f2a37]/90">{selected.duration}</span>
-                </div>
+              <div className="text-[14px] text-[#0f2a37]/70">
+                {selected.author}
+              </div>
+              <div className="mt-3 flex items-center gap-2 text-[14px]">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-black text-white">
+                  <svg
+                    viewBox="0 0 16 16"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                  >
+                    <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z" />
+                  </svg>
+                </span>
+                <span className="text-[#0f2a37]/90">{selected.duration}</span>
               </div>
             </div>
-          </Link>
-        </section>
-
-        <section>
-          <h2 className="text-[22px] font-semibold text-[#0f2a37]">Recommended For You</h2>
-          <p className="mb-4 text-[14px] text-[#0f2a37]/60">We think you’ll like these</p>
-          <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {recommended.map((b) => (
-              <Link key={b.id} href={`/book/${b.id}`} className="block">
-                <div className="relative mb-2">
-                  {b.premium && (
-                    <span className="absolute -top-2 right-0 rounded-full bg-[#0f2a37]/10 px-2 py-0.5 text-[12px] text-[#0f2a37]">
-                      Premium
-                    </span>
-                  )}
-                  <div className="relative aspect-[3/4] w-full">
-                    <Image
-                      src={b.image}
-                      alt="book"
-                      fill
-                      sizes="(min-width: 1280px) 220px, 33vw"
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-                <div className="text-[16px] font-semibold leading-snug line-clamp-2">{b.title}</div>
-                <div className="text-[13px] text-[#0f2a37]/70">{b.author}</div>
-                {b.subtitle && <div className="mt-1 text-[13px] text-[#0f2a37]/80 line-clamp-2">{b.subtitle}</div>}
-                <div className="mt-2 flex items-center gap-4 text-[13px] text-[#0f2a37]/70">
-                  <span className="inline-flex items-center gap-1">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                      <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm1 5h-2v6h6v-2h-4z" />
-                    </svg>
-                    {b.duration}
-                  </span>
-                  {b.rating && (
-                    <span className="inline-flex items-center gap-1">
-                      <svg viewBox="0 0 1024 1024" width="14" height="14" fill="currentColor">
-                        <path d="M908.1 353.1l-253.9-36.9L540.7 86.1c-3.1-6.3-8.2-11.4-14.5-14.5-15.8-7.8-35-1.3-42.9 14.5L369.8 316.2l-253.9 36.9c-7 1-13.4 4.3-18.3 9.3a32.05 32.05 0 0 0 .6 45.3l183.7 179.1-43.4 252.9a31.95 31.95 0 0 0 46.4 33.7L512 754l227.1 119.4c6.2 3.3 13.4 4.4 20.3 3.2 17.4-3 29.1-19.5 26.1-36.9l-43.4-252.9 183.7-179.1c5-4.9 8.3-11.3 9.3-18.3 2.7-17.5-9.5-33.7-27-36.3z" />
-                      </svg>
-                      {b.rating}
-                    </span>
-                  )}
-                </div>
-              </Link>
-            ))}
           </div>
-        </section>
+        </Link>
+      </section>
 
-        <section>
-          <h2 className="text-[22px] font-semibold text-[#0f2a37]">Suggested Books</h2>
-          <p className="mb-4 text-[14px] text-[#0f2a37]/60">Browse those books</p>
-          <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {suggested.map((b) => (
-              <Link key={b.id} href={`/book/${b.id}`} className="block">
-                <div className="relative mb-2">
-                  {b.premium && (
-                    <span className="absolute -top-2 right-0 rounded-full bg-[#0f2a37]/10 px-2 py-0.5 text-[12px] text-[#0f2a37]">
-                      Premium
-                    </span>
-                  )}
-                  <div className="relative aspect-[3/4] w-full">
-                    <Image src={b.image} alt="book" fill className="object-contain" />
-                  </div>
-                </div>
-                <div className="text-[16px] font-semibold leading-snug line-clamp-2">{b.title}</div>
-                <div className="text-[13px] text-[#0f2a37]/70">{b.author}</div>
-                {b.subtitle && <div className="mt-1 text-[13px] text-[#0f2a37]/80 line-clamp-2">{b.subtitle}</div>}
-                <div className="mt-2 flex items-center gap-4 text-[13px] text-[#0f2a37]/70">
-                  <span className="inline-flex items-center gap-1">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                      <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm1 5h-2v6h6v-2h-4z" />
-                    </svg>
-                    {b.duration}
+      <section>
+        <h2 className="text-[22px] font-semibold text-[#0f2a37]">
+          Recommended For You
+        </h2>
+        <p className="mb-4 text-[14px] text-[#0f2a37]/60">
+          We think you’ll like these
+        </p>
+        <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {recommended.map((b) => (
+            <Link key={b.id} href={`/book/${b.id}`} className="block">
+              <div className="relative mb-2">
+                {b.premium && (
+                  <span className="absolute -top-2 right-0 rounded-full bg-[#0f2a37]/10 px-2 py-0.5 text-[12px] text-[#0f2a37]">
+                    Premium
                   </span>
-                  {b.rating && (
-                    <span className="inline-flex items-center gap-1">
-                      <svg viewBox="0 0 1024 1024" width="14" height="14" fill="currentColor">
-                        <path d="M908.1 353.1l-253.9-36.9L540.7 86.1c-3.1-6.3-8.2-11.4-14.5-14.5-15.8-7.8-35-1.3-42.9 14.5L369.8 316.2l-253.9 36.9c-7 1-13.4 4.3-18.3 9.3a32.05 32.05 0 0 0 .6 45.3l183.7 179.1-43.4 252.9a31.95 31.95 0 0 0 46.4 33.7L512 754l227.1 119.4c6.2 3.3 13.4 4.4 20.3 3.2 17.4-3 29.1-19.5 26.1-36.9l-43.4-252.9 183.7-179.1c5-4.9 8.3-11.3 9.3-18.3 2.7-17.5-9.5-33.7-27-36.3z" />
-                      </svg>
-                      {b.rating}
-                    </span>
-                  )}
+                )}
+                <div className="relative aspect-[3/4] w-full">
+                  <Image
+                    src={b.image}
+                    alt="book"
+                    fill
+                    sizes="(min-width: 1280px) 220px, 33vw"
+                    className="object-contain"
+                  />
                 </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      </main>
-    </div>
+              </div>
+              <div className="text-[16px] font-semibold leading-snug line-clamp-2">
+                {b.title}
+              </div>
+              <div className="text-[13px] text-[#0f2a37]/70">{b.author}</div>
+              {b.subtitle && (
+                <div className="mt-1 text-[13px] text-[#0f2a37]/80 line-clamp-2">
+                  {b.subtitle}
+                </div>
+              )}
+              <div className="mt-2 flex items-center gap-4 text-[13px] text-[#0f2a37]/70">
+                <span className="inline-flex items-center gap-1">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="14"
+                    height="14"
+                    fill="currentColor"
+                  >
+                    <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm1 5h-2v6h6v-2h-4z" />
+                  </svg>
+                  {b.duration}
+                </span>
+                {b.rating && (
+                  <span className="inline-flex items-center gap-1">
+                    <svg
+                      viewBox="0 0 1024 1024"
+                      width="14"
+                      height="14"
+                      fill="currentColor"
+                    >
+                      <path d="M908.1 353.1l-253.9-36.9L540.7 86.1c-3.1-6.3-8.2-11.4-14.5-14.5-15.8-7.8-35-1.3-42.9 14.5L369.8 316.2l-253.9 36.9c-7 1-13.4 4.3-18.3 9.3a32.05 32.05 0 0 0 .6 45.3l183.7 179.1-43.4 252.9a31.95 31.95 0 0 0 46.4 33.7L512 754l227.1 119.4c6.2 3.3 13.4 4.4 20.3 3.2 17.4-3 29.1-19.5 26.1-36.9l-43.4-252.9 183.7-179.1c5-4.9 8.3-11.3 9.3-18.3 2.7-17.5-9.5-33.7-27-36.3z" />
+                    </svg>
+                    {b.rating}
+                  </span>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-[22px] font-semibold text-[#0f2a37]">
+          Suggested Books
+        </h2>
+        <p className="mb-4 text-[14px] text-[#0f2a37]/60">Browse those books</p>
+        <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {suggested.map((b) => (
+            <Link key={b.id} href={`/book/${b.id}`} className="block">
+              <div className="relative mb-2">
+                {b.premium && (
+                  <span className="absolute -top-2 right-0 rounded-full bg-[#0f2a37]/10 px-2 py-0.5 text-[12px] text-[#0f2a37]">
+                    Premium
+                  </span>
+                )}
+                <div className="relative aspect-[3/4] w-full">
+                  <Image
+                    src={b.image}
+                    alt="book"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+              <div className="text-[16px] font-semibold leading-snug line-clamp-2">
+                {b.title}
+              </div>
+              <div className="text-[13px] text-[#0f2a37]/70">{b.author}</div>
+              {b.subtitle && (
+                <div className="mt-1 text-[13px] text-[#0f2a37]/80 line-clamp-2">
+                  {b.subtitle}
+                </div>
+              )}
+              <div className="mt-2 flex items-center gap-4 text-[13px] text-[#0f2a37]/70">
+                <span className="inline-flex items-center gap-1">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="14"
+                    height="14"
+                    fill="currentColor"
+                  >
+                    <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm1 5h-2v6h6v-2h-4z" />
+                  </svg>
+                  {b.duration}
+                </span>
+                {b.rating && (
+                  <span className="inline-flex items-center gap-1">
+                    <svg
+                      viewBox="0 0 1024 1024"
+                      width="14"
+                      height="14"
+                      fill="currentColor"
+                    >
+                      <path d="M908.1 353.1l-253.9-36.9L540.7 86.1c-3.1-6.3-8.2-11.4-14.5-14.5-15.8-7.8-35-1.3-42.9 14.5L369.8 316.2l-253.9 36.9c-7 1-13.4 4.3-18.3 9.3a32.05 32.05 0 0 0 .6 45.3l183.7 179.1-43.4 252.9a31.95 31.95 0 0 0 46.4 33.7L512 754l227.1 119.4c6.2 3.3 13.4 4.4 20.3 3.2 17.4-3 29.1-19.5 26.1-36.9l-43.4-252.9 183.7-179.1c5-4.9 8.3-11.3 9.3-18.3 2.7-17.5-9.5-33.7-27-36.3z" />
+                    </svg>
+                    {b.rating}
+                  </span>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </main>
   );
 }
