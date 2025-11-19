@@ -3,9 +3,8 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "@/lib/firebaseConfig";
 import AuthModal from "@/components/AuthModal";
+import { useSubscription } from "@/hooks/useSubscription";
 
 type ApiBook = {
   id?: string;
@@ -58,16 +57,15 @@ export default function Page() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
+  const { user, isActive, loading: subLoading } = useSubscription();
+
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
-  const [authUser, setAuthUser] = useState<User | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setAuthUser(u));
-    return () => unsub();
-  }, []);
+  const isGuest = !user || user.isAnonymous;
+  const hasPremium = !isGuest && isActive;
 
   useEffect(() => {
     let cancelled = false;
@@ -151,11 +149,13 @@ export default function Page() {
   }, [id]);
 
   useEffect(() => {
-    if (!authUser || !book) return;
+    if (!user || !book) return;
     if (typeof window === "undefined") return;
-    const key = `library_${authUser.uid}`;
+
+    const key = `library_${user.uid}`;
     const raw = window.localStorage.getItem(key);
     if (!raw) return;
+
     try {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.includes(book.id)) {
@@ -164,7 +164,7 @@ export default function Page() {
     } catch {
       return;
     }
-  }, [authUser, book]);
+  }, [user, book]);
 
   const duration = useMemo(() => {
     const v = book?.duration?.trim();
@@ -179,26 +179,28 @@ export default function Page() {
   }, [book?.duration]);
 
   function handlePlay(kind: "read" | "listen") {
-    if (!authUser) {
+    if (!user) {
       setShowAuth(true);
       return;
     }
-    if (book?.subscriptionRequired) {
+
+    if (book?.subscriptionRequired && !hasPremium) {
       router.push("/choose-plan");
       return;
     }
+
     router.push(`/player/${book?.id}?mode=${kind}`);
   }
 
   function handleAddToLibrary() {
-    if (!authUser) {
+    if (!user) {
       setShowAuth(true);
       return;
     }
     if (!book) return;
     if (typeof window === "undefined") return;
 
-    const key = `library_${authUser.uid}`;
+    const key = `library_${user.uid}`;
     const raw = window.localStorage.getItem(key);
     let ids: string[] = [];
 
@@ -228,7 +230,7 @@ export default function Page() {
     }
   }
 
-  if (loading) {
+  if (loading || subLoading) {
     return (
       <div>
         <main className="w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 py-10 mx-auto md:mx-0">
@@ -274,7 +276,11 @@ export default function Page() {
             <div className="order-2 lg:order-1">
               <h1 className="text-[24px] sm:text-[28px] font-semibold text-[#0f2a37] text-center md:text-left">
                 {book.title}
-                {book.subscriptionRequired ? " (Premium)" : ""}
+                {book.subscriptionRequired && !hasPremium && (
+                  <span className="ml-2 inline-flex items-center rounded-full bg-[#f1f6f4] px-3 py-1 text-xs font-semibold text-[#0365f2] align-middle">
+                    Premium
+                  </span>
+                )}
               </h1>
 
               <div className="mt-1 text-[15px] text-[#0f2a37]/80 text-center md:text-left">

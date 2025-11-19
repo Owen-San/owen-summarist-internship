@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useSubscription } from "@/hooks/useSubscription";
 
 type Book = {
   id: string;
@@ -227,6 +230,11 @@ const suggested: Book[] = [
 ];
 
 export default function ForYouPage() {
+  const { user, isActive, loading } = useSubscription();
+
+  const isGuest = !user || user.isAnonymous;
+  const hasPremium = !loading && !isGuest && isActive;
+
   return (
     <main className="mx-auto max-w-[980px] px-6 py-8 space-y-10">
       <section>
@@ -287,7 +295,7 @@ export default function ForYouPage() {
           {recommended.map((b) => (
             <Link key={b.id} href={`/book/${b.id}`} className="block">
               <div className="relative mb-2">
-                {b.premium && (
+                {b.premium && !hasPremium && !loading && (
                   <span className="absolute -top-2 right-0 rounded-full bg-[#0f2a37]/10 px-2 py-0.5 text-[12px] text-[#0f2a37]">
                     Premium
                   </span>
@@ -351,7 +359,7 @@ export default function ForYouPage() {
           {suggested.map((b) => (
             <Link key={b.id} href={`/book/${b.id}`} className="block">
               <div className="relative mb-2">
-                {b.premium && (
+                {b.premium && !hasPremium && !loading && (
                   <span className="absolute -top-2 right-0 rounded-full bg-[#0f2a37]/10 px-2 py-0.5 text-[12px] text-[#0f2a37]">
                     Premium
                   </span>

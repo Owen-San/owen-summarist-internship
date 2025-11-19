@@ -3,6 +3,9 @@
 import Image from "next/image";
 import { useState } from "react";
 import { FaRegFileAlt, FaSeedling, FaHandshake } from "react-icons/fa";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth, db } from "@/lib/firebaseConfig";
+import { collection, doc, addDoc, onSnapshot } from "firebase/firestore";
 
 type FaqItem = {
   question: string;
@@ -35,14 +38,96 @@ const faqItems: FaqItem[] = [
 
 type PlanId = "yearly" | "monthly";
 
+const YEARLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID || "";
+const MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID || "";
+
 export default function ChoosePlanPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [selectedPlan, setSelectedPlan] = useState<PlanId>("yearly");
+  const [loading, setLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
+  const [user] = useAuthState(auth);
+
+  async function handleStartTrial() {
+    setCheckoutError("");
+
+    const priceId =
+      selectedPlan === "yearly" ? YEARLY_PRICE_ID : MONTHLY_PRICE_ID;
+
+    if (!priceId) {
+      setCheckoutError("Missing price configuration. Please try again later.");
+      return;
+    }
+
+    if (!user) {
+      setCheckoutError("You must be logged in to start a subscription.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const customerDocRef = doc(collection(db, "customers"), user.uid);
+      const checkoutSessionsRef = collection(
+        customerDocRef,
+        "checkout_sessions"
+      );
+
+      const docRef = await addDoc(checkoutSessionsRef, {
+        price: priceId,
+        mode: "subscription",
+        success_url: `${window.location.origin}/settings?checkout=success`,
+        cancel_url: `${window.location.origin}/choose-plan?canceled=true`,
+        allow_promotion_codes: true,
+      });
+
+      const unsubscribe = onSnapshot(docRef, (snap) => {
+        const data = snap.data() as
+          | {
+              url?: string;
+              error?: { message?: string } | string;
+            }
+          | undefined;
+
+        if (!data) {
+          return;
+        }
+
+        if (data.error) {
+          const message =
+            typeof data.error === "string"
+              ? data.error
+              : data.error.message || "Unable to start checkout.";
+          console.error("Checkout session error from Firestore:", data.error);
+          setCheckoutError(message);
+          setLoading(false);
+          unsubscribe();
+          return;
+        }
+
+        if (data.url) {
+          unsubscribe();
+          window.location.href = data.url;
+        }
+      });
+    } catch (err: unknown) {
+      console.error("Checkout error:", err);
+      let message = "Something went wrong. Please try again.";
+
+      if (err instanceof Error && err.message) {
+        message = err.message;
+      } else if (typeof err === "string") {
+        message = err;
+      }
+
+      setCheckoutError(message);
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
       <main className="min-h-screen bg-white text-[#032b41] animate-[choose-plan-slide-in_0.35s_ease-out_forwards]">
-        {/* HERO */}
         <section className="relative overflow-hidden bg-[#032b41] text-white pt-16 pb-24">
           <div className="pointer-events-none absolute inset-x-[-30%] bottom-[-260px] h-[520px] rounded-[50%] bg-white" />
           <div className="relative mx-auto flex max-w-[980px] flex-col items-center px-4 text-center">
@@ -70,11 +155,8 @@ export default function ChoosePlanPage() {
           </div>
         </section>
 
-        {/* FEATURES + PLANS */}
         <section className="mx-auto max-w-[980px] px-4 pb-32 pt-10">
-          {/* three feature icons */}
           <div className="grid gap-10 text-center md:grid-cols-3">
-            {/* Document icon */}
             <div>
               <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#f1f6f4] text-[#032b41]">
                 <FaRegFileAlt className="h-9 w-9" />
@@ -85,7 +167,6 @@ export default function ChoosePlanPage() {
               </p>
             </div>
 
-            {/* Plant icon */}
             <div>
               <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#f1f6f4] text-[#032b41]">
                 <FaSeedling className="h-9 w-9" />
@@ -96,7 +177,6 @@ export default function ChoosePlanPage() {
               </p>
             </div>
 
-            {/* Handshake icon */}
             <div>
               <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#f1f6f4] text-[#032b41]">
                 <FaHandshake className="h-9 w-9" />
@@ -114,9 +194,7 @@ export default function ChoosePlanPage() {
             </h2>
           </div>
 
-          {/* PLAN CARDS */}
           <div className="mx-auto mt-8 max-w-[580px] space-y-6">
-            {/* Yearly */}
             <button
               type="button"
               onClick={() => setSelectedPlan("yearly")}
@@ -143,21 +221,20 @@ export default function ChoosePlanPage() {
                 </div>
               </div>
               <div className="mt-3 text-[20px] font-bold text-[#032b41]">
-                $99.99<span className="text-[16px] font-semibold">/year</span>
+                $99.99
+                <span className="text-[16px] font-semibold">/year</span>
               </div>
               <div className="mt-1 text-[13px] text-[#00a061]">
                 7-day free trial included
               </div>
             </button>
 
-            {/* OR divider between plans */}
             <div className="flex items-center gap-4 text-[12px] text-[#6b757b]">
               <div className="h-px flex-1 bg-[#d8e2e7]" />
               <span>or</span>
               <div className="h-px flex-1 bg-[#d8e2e7]" />
             </div>
 
-            {/* Monthly */}
             <button
               type="button"
               onClick={() => setSelectedPlan("monthly")}
@@ -184,7 +261,8 @@ export default function ChoosePlanPage() {
                 </div>
               </div>
               <div className="mt-3 text-[20px] font-bold text-[#032b41]">
-                $9.99<span className="text-[16px] font-semibold">/month</span>
+                $9.99
+                <span className="text-[16px] font-semibold">/month</span>
               </div>
               <div className="mt-1 text-[13px] text-[#6b757b]">
                 No trial included
@@ -193,11 +271,22 @@ export default function ChoosePlanPage() {
           </div>
         </section>
 
-        {/* FULL-WIDTH STICKY TRIAL BAR */}
         <div className="sticky bottom-0 z-40 w-full border-t border-[#e1e7eb] bg-white">
           <div className="mx-auto max-w-[580px] px-4 py-4 text-center">
-            <button className="mb-2 w-full rounded-md bg-[#2bd97c] py-3.5 text-[15px] font-semibold text-white">
-              Start your free 7-day trial
+            {checkoutError && (
+              <p className="mb-2 text-[12px] text-red-600">{checkoutError}</p>
+            )}
+            <button
+              type="button"
+              onClick={handleStartTrial}
+              disabled={loading}
+              className="mb-2 w-full rounded-md bg-[#2bd97c] py-3.5 text-[15px] font-semibold text-white disabled:opacity-70"
+            >
+              {loading
+                ? "Redirecting..."
+                : selectedPlan === "yearly"
+                ? "Start your free 7-day trial"
+                : "Start your first month"}
             </button>
             <p className="text-[12px] text-[#6b757b]">
               Cancel your trial at any time before it ends, and you won&apos;t
@@ -206,7 +295,6 @@ export default function ChoosePlanPage() {
           </div>
         </div>
 
-        {/* FAQ */}
         <section className="border-t border-[#e1e7eb] bg-white">
           <div className="mx-auto max-w-[980px] px-4 py-10">
             <div className="divide-y divide-[#e1e7eb] border-b border-[#e1e7eb]">
@@ -242,7 +330,6 @@ export default function ChoosePlanPage() {
           </div>
         </section>
 
-        {/* FOOTER */}
         <footer className="border-t border-[#e1e7eb] bg-[#f7faf9]">
           <div className="mx-auto flex max-w-[980px] flex-col gap-10 px-4 py-10 text-[13px] text-[#6b757b] md:flex-row md:justify-between">
             <div className="space-y-2">

@@ -1,69 +1,95 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "@/lib/firebaseConfig";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import AuthModal from "@/components/AuthModal";
+import { useSubscription } from "@/hooks/useSubscription";
+import { goToBillingPortal } from "@/lib/stripe";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [authUser, setAuthUser] = useState<User | null>(null);
+  const searchParams = useSearchParams();
+  const { user, planLabel, isActive, loading } = useSubscription();
+
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [isManaging, setIsManaging] = useState(false);
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      setAuthUser(user);
-    });
-    return () => unsub();
-  }, []);
+  const isGuest = !user || user.isAnonymous;
 
-  const isGuest = !authUser || authUser.isAnonymous;
+  const emailDisplay = isGuest ? "Guest Account" : user?.email ?? "No email";
 
-  const emailDisplay = isGuest
-    ? "Guest Account"
-    : authUser?.email ?? "No email";
+  const planDisplay = loading
+    ? "Checking your plan..."
+    : isActive
+    ? planLabel
+    : "Basic";
 
   const buttonLabel = isGuest
     ? "Login to upgrade plan"
+    : isActive
+    ? isManaging
+      ? "Opening billing portal..."
+      : "Manage subscription"
     : "Upgrade to Premium";
 
-  function handleUpgradeClick() {
+  async function handleUpgradeClick() {
+    if (loading || isManaging) {
+      return;
+    }
+
     if (isGuest) {
       setAuthModalOpen(true);
-    } else {
-      router.push("/choose-plan"); // ✅ Redirect for real logged-in users
+      return;
     }
+
+    if (isActive) {
+      setIsManaging(true);
+      try {
+        await goToBillingPortal();
+      } finally {
+        setIsManaging(false);
+      }
+      return;
+    }
+
+    router.push("/choose-plan");
   }
+
+  const checkoutSuccess = searchParams.get("checkout") === "success";
 
   return (
     <>
       <div className="md:pl-10">
         <main className="w-full max-w-[980px] px-6 py-14">
-          {/* HEADER */}
           <h1 className="text-[34px] font-bold text-[#032b41]">Settings</h1>
+
+          {checkoutSuccess && (
+            <div className="mt-4 rounded-md bg-[#e6f4ea] px-4 py-3 text-[14px] text-[#0f5132]">
+              Your subscription has been updated successfully.
+            </div>
+          )}
+
           <div className="mt-6 border-t border-[#e1e7eb]" />
 
-          {/* SUBSCRIPTION SECTION */}
           <section className="mt-10 border-b border-[#e1e7eb] pb-10">
             <h2 className="text-[22px] font-semibold text-[#032b41]">
               Your Subscription plan
             </h2>
 
-            <p className="mt-4 text-[17px] text-[#394547]">Basic</p>
+            <p className="mt-4 text-[17px] text-[#394547]">{planDisplay}</p>
 
             <button
               type="button"
               onClick={handleUpgradeClick}
-              className="mt-5 inline-flex items-center justify-center rounded-md
-                         bg-[#2bd97c] px-8 py-3.5 text-[16px] font-semibold
-                         text-white hover:bg-[#22c56c] transition-colors"
+              disabled={loading || isManaging}
+              className={`mt-5 inline-flex items-center justify-center rounded-md bg-[#2bd97c] px-8 py-3.5 text-[16px] font-semibold text-white hover:bg-[#22c56c] transition-colors ${
+                loading || isManaging ? "opacity-60 cursor-not-allowed" : ""
+              }`}
             >
               {buttonLabel}
             </button>
           </section>
 
-          {/* EMAIL SECTION */}
           <section className="mt-10">
             <h2 className="text-[22px] font-semibold text-[#032b41]">Email</h2>
             <p className="mt-4 text-[17px] text-[#032b41]">{emailDisplay}</p>
@@ -71,7 +97,6 @@ export default function SettingsPage() {
         </main>
       </div>
 
-      {/* AUTH MODAL */}
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </>
   );
