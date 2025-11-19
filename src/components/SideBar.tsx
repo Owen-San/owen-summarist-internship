@@ -2,21 +2,73 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
+import { useEffect, useState } from "react";
 
-export default function Sidebar() {
+type FontSizeKey = "sm" | "md" | "lg" | "xl";
+
+const sizeMap: Record<FontSizeKey, string> = {
+  sm: "16px",
+  md: "18px",
+  lg: "20px",
+  xl: "22px",
+};
+
+type SidebarProps = {
+  variant?: "desktop" | "mobile";
+};
+
+export default function Sidebar({ variant = "desktop" }: SidebarProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isPlayer = pathname?.startsWith("/player");
+
+  const [fontSize, setFontSize] = useState<FontSizeKey>(() => {
+    if (typeof window === "undefined") return "md";
+    const saved = window.localStorage.getItem("playerFontSize") as
+      | FontSizeKey
+      | null;
+    if (saved === "sm" || saved === "md" || saved === "lg" || saved === "xl") {
+      return saved;
+    }
+    return "md";
+  });
 
   async function handleLogout() {
     await signOut(auth);
     router.push("/");
   }
 
+  function applyFontSize(size: FontSizeKey) {
+    setFontSize(size);
+  }
+
+  useEffect(() => {
+    if (!isPlayer) return;
+    if (typeof document !== "undefined") {
+      document.documentElement.style.setProperty(
+        "--player-font-size",
+        sizeMap[fontSize]
+      );
+    }
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("playerFontSize", fontSize);
+    }
+  }, [fontSize, isPlayer]);
+
+  const base = "h-screen w-72 border-r border-zinc-200 bg-white";
+  const desktopClasses = "hidden md:flex sticky top-0";
+  const mobileClasses = "flex md:hidden";
+
   return (
-    <aside className="hidden md:flex h-screen w-72 border-r border-zinc-200 bg-white sticky top-0">
-      <div className="flex h-full w-full flex-col">
+    <aside
+      className={`${base} ${
+        variant === "desktop" ? desktopClasses : mobileClasses
+      }`}
+    >
+      <div className={`flex h-full w-full flex-col ${isPlayer ? "pb-24" : ""}`}>
         <div className="px-7 py-7">
           <div className="relative h-12 w-44">
             <Image src="/logo.png" alt="Summarist" fill className="object-contain" />
@@ -24,7 +76,10 @@ export default function Sidebar() {
         </div>
 
         <nav className="px-4 space-y-1.5 text-[16px]">
-          <Link href="/foryou" className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-md bg-zinc-100 text-[#0f2a37]">
+          <Link
+            href="/foryou"
+            className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-md bg-zinc-100 text-[#0f2a37]"
+          >
             <span className="inline-block h-5 w-5">
               <svg viewBox="0 0 1024 1024" width="18" height="18">
                 <path
@@ -36,7 +91,10 @@ export default function Sidebar() {
             For you
           </Link>
 
-          <Link href="/library" className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-md hover:bg-zinc-100 text-[#0f2a37]/80">
+          <Link
+            href="/library"
+            className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-md hover:bg-zinc-100 text-[#0f2a37]/80"
+          >
             <span className="inline-block h-5 w-5">
               <svg viewBox="0 0 16 16" width="18" height="18">
                 <path
@@ -73,12 +131,46 @@ export default function Sidebar() {
           </div>
         </nav>
 
+        {isPlayer && (
+          <div className="px-7 pt-6">
+            <div className="flex items-center gap-4 text-[#0f2a37]">
+              {(["sm", "md", "lg", "xl"] as FontSizeKey[]).map((size, index) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => applyFontSize(size)}
+                  className={`pb-1 ${
+                    fontSize === size ? "border-b-2 border-[#2BD97C]" : ""
+                  }`}
+                >
+                  <span
+                    className={
+                      index === 0
+                        ? "text-[16px]"
+                        : index === 1
+                        ? "text-[18px]"
+                        : index === 2
+                        ? "text-[20px]"
+                        : "text-[22px]"
+                    }
+                  >
+                    Aa
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="mt-auto px-4 space-y-1.5 pb-7">
-          <Link href="/settings" className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-md hover:bg-zinc-100 text-[#0f2a37]/80">
+          <Link
+            href="/settings"
+            className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-md hover:bg-zinc-100 text-[#0f2a37]/80"
+          >
             <span className="inline-block h-5 w-5">
               <svg viewBox="0 0 15 15" width="18" height="18">
                 <path
-                  d="M7.07.65c-.4 0-.74.27-.83.66l-.24 1.05c-.38.11-.74.26-1.08.45l-.91-.57a.85.85 0 0 0-1.05.08l-.61.61a.85.85 0 0 0-.08 1.05l.57.91c-.19.34-.34.7-.45 1.08l-1.05.24a.85.85 0 0 0-.66.83v.86c0 .4.27.74.66.83l1.05.24c.11.38.26.74.45 1.08l-.57.91a.85.85 0 0 0 .08 1.05l.61.61c.29.29.75.34 1.05.08l.91-.57c.34.19.7.34 1.08.45l.24 1.05c.09.39.43.66.83.66h.86c.4 0 .74-.27.83-.66l.24-1.05c.38-.11.74-.26 1.08-.45l.91.57c.3.26.76.21 1.05-.08l.61-.61c.29-.29.34-.75.08-1.05l-.57-.91c.19-.34.34-.7.45-1.08l1.05-.24c.39-.09.66-.43.66-.83v-.86c0-.4-.27-.74-.66-.83l-1.05-.24a5 5 0 0 0-.45-1.08l.57-.91a.85.85 0 0 0-.08-1.05l-.61-.61a.85.85 0 0 0-1.05-.08l-.91.57a5 5 0 0 0-1.08-.45l-.24-1.05A.85.85 0 0 0 7.93.65h-.86z"
+                  d="M7.07.65c-.4 0-.74.27-.83.66l-.24 1.05c-.38.11-.74.26-1.08.45l-.91-.57a.85.85 0 0 0-1.05.08l-.61.61a.85.85 0 0 0-.08 1.05l.57.91c-.19.34-.34.7-.45 1.08l-1.05.24a.85.85 0 0 0-.66.83v.86c0 .4.27.74.66.83l1.05.24c.11.38.26.74.45 1.08l-.57.91a.85.85 0 0 0 .08 1.05l.61.61c.29.29.75.34 1.05.08l.91-.57c.34.19.7.34 1.08.45l.24 1.05c.09.39.43.66.83.66h.86c.4 0 .74-.27.83-.66l.24-1.05c.38-.11.74-.26 1.08-.45l.91.57c.3.26.76.21 1.05-.08l.61-.61c.29-.29.34-.75.08-1.05l-.57-.91c.19-.34.34-.7.45-1.08l1.05-.24c.39-.09.66-.43.66-.83v-.86c0-.4-.27-.74-.66-.83l-1.05-.24a5 5 0 0 0-.45-1.08l-.57-.91a.85.85 0 0 0-.08-1.05l-.61-.61a.85.85 0 0 0-1.05-.08l-.91.57a5 5 0 0 0-1.08-.45l-.24-1.05A.85.85 0 0 0 7.93.65h-.86z"
                   fill="currentColor"
                 />
               </svg>
@@ -86,7 +178,10 @@ export default function Sidebar() {
             Settings
           </Link>
 
-          <div className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-md text-[#0f2a37]/50 select-none cursor-not-allowed" title="Coming soon">
+          <div
+            className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-md text-[#0f2a37]/50 select-none cursor-not-allowed"
+            title="Coming soon"
+          >
             <span className="inline-block h-5 w-5">
               <svg viewBox="0 0 24 24" width="18" height="18">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" strokeWidth="2" />

@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FiSearch, FiMenu, FiX } from "react-icons/fi";
 import { useRouter } from "next/navigation";
+import Sidebar from "@/components/SideBar";
 
 type BookSuggestion = {
   id: string;
@@ -16,6 +17,7 @@ const SearchBar: React.FC = () => {
   const [results, setResults] = useState<BookSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const debounceRef = useRef<number | null>(null);
   const router = useRouter();
@@ -116,7 +118,10 @@ const SearchBar: React.FC = () => {
                   {showSkeleton && (
                     <div className="p-4 space-y-5">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex items-center gap-4 animate-pulse h-[70px]">
+                        <div
+                          key={i}
+                          className="flex items-center gap-4 animate-pulse h-[70px]"
+                        >
                           <div className="w-14 h-full bg-[#e1e7ea] rounded-md" />
                           <div className="flex-1 space-y-3">
                             <div className="h-4 w-3/4 bg-[#e1e7ea] rounded-md" />
@@ -162,9 +167,43 @@ const SearchBar: React.FC = () => {
             </div>
           </div>
 
-          <button className="md:hidden sm:flex items-center justify-center cursor-pointer">
+          <button
+            type="button"
+            className="md:hidden flex items-center justify-center cursor-pointer"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open menu"
+          >
             <FiMenu className="w-6 h-6" />
           </button>
+        </div>
+      </div>
+
+      {/* Mobile drawer */}
+      <div
+        className={`fixed inset-0 z-[70] md:hidden transition-opacity duration-200 ${
+          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div
+          className="absolute inset-0 bg-black/40"
+          onClick={() => setMobileOpen(false)}
+        />
+        <div
+          className="absolute left-0 top-0 h-full w-72 bg-white shadow-xl transition-transform duration-200"
+          style={{
+            transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
+          }}
+        >
+          <button
+            type="button"
+            className="absolute top-4 right-4 text-[#03314b]"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close menu"
+          >
+            <FiX className="w-6 h-6" />
+          </button>
+
+          <Sidebar variant="mobile" />
         </div>
       </div>
     </div>

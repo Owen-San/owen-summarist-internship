@@ -20,11 +20,22 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   }, []);
 
   const isHome = pathname === "/";
+  const isPlayer = pathname?.startsWith("/player");
 
   return (
     <html lang="en">
-      <body className="antialiased flex">
-        {user && !isHome && <SideBar />}
+      <body
+        className={
+          isPlayer
+            ? "antialiased flex h-[calc(100vh-90px)]"
+            : "antialiased flex min-h-screen"
+        }
+      >
+        {user && !isHome && (
+          <div className={isPlayer ? "pb-[500px]" : ""}>
+            <SideBar />
+          </div>
+        )}
 
         <main className="flex-1 overflow-y-auto">
           {user && !isHome && <SearchBar />}
