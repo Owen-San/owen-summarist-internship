@@ -62,6 +62,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [showAuth, setShowAuth] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setAuthUser(u));
@@ -149,6 +150,22 @@ export default function Page() {
     };
   }, [id]);
 
+  useEffect(() => {
+    if (!authUser || !book) return;
+    if (typeof window === "undefined") return;
+    const key = `library_${authUser.uid}`;
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.includes(book.id)) {
+        setSaved(true);
+      }
+    } catch {
+      return;
+    }
+  }, [authUser, book]);
+
   const duration = useMemo(() => {
     const v = book?.duration?.trim();
     if (!v) return "";
@@ -178,7 +195,37 @@ export default function Page() {
       setShowAuth(true);
       return;
     }
-    router.refresh();
+    if (!book) return;
+    if (typeof window === "undefined") return;
+
+    const key = `library_${authUser.uid}`;
+    const raw = window.localStorage.getItem(key);
+    let ids: string[] = [];
+
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          ids = parsed.filter((x) => typeof x === "string");
+        }
+      } catch {
+        ids = [];
+      }
+    }
+
+    if (ids.includes(book.id)) {
+      ids = ids.filter((x) => x !== book.id);
+      if (ids.length > 0) {
+        window.localStorage.setItem(key, JSON.stringify(ids));
+      } else {
+        window.localStorage.removeItem(key);
+      }
+      setSaved(false);
+    } else {
+      ids.push(book.id);
+      window.localStorage.setItem(key, JSON.stringify(ids));
+      setSaved(true);
+    }
   }
 
   if (loading) {
@@ -331,14 +378,31 @@ export default function Page() {
 
               <button
                 onClick={handleAddToLibrary}
-                className="mt-6 flex items-center gap-2 text-[#0f2a37] justify-center md:justify-start"
+                className={`mt-6 flex items-center gap-2 justify-center md:justify-start ${
+                  saved ? "text-[#2BD97C]" : "text-[#0f2a37]"
+                }`}
               >
                 <span>
-                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-                    <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2z" />
-                  </svg>
+                  {saved ? (
+                    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                      <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2z" />
+                    </svg>
+                  ) : (
+                    <svg
+                      viewBox="0 0 16 16"
+                      width="16"
+                      height="16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.2"
+                    >
+                      <path d="M4 1h8a1 1 0 0 1 1 1v12.566a.5.5 0 0 1-.777.416L8 12.5l-4.223 2.482A.5.5 0 0 1 3 14.566V2a1 1 0 0 1 1-1z" />
+                    </svg>
+                  )}
                 </span>
-                <span className="text-[15px] text-[#0f2a37]">Add title to My Library</span>
+                <span className="text-[15px]">
+                  {saved ? "Saved in My Library" : "Add title to My Library"}
+                </span>
               </button>
 
               <h2 className="mt-10 text-xl font-semibold text-[#0f2a37]">

@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { FcGoogle } from "react-icons/fc";
 import {
@@ -49,10 +53,16 @@ export default function SignUpModal({
     } catch (e: unknown) {
       if (e instanceof FirebaseError) {
         const code = e.code;
-        if (code === "auth/popup-closed-by-user") setGoogleErr("Popup closed before completing sign up.");
-        else if (code === "auth/account-exists-with-different-credential") setGoogleErr("Email already used with another sign-in method. Please log in with that method.");
-        else if (code === "auth/popup-blocked") setGoogleErr("Popup was blocked. Please allow popups and try again.");
-        else if (code === "auth/cancelled-popup-request") setGoogleErr("Popup canceled. Try again.");
+        if (code === "auth/popup-closed-by-user")
+          setGoogleErr("Popup closed before completing sign up.");
+        else if (code === "auth/account-exists-with-different-credential")
+          setGoogleErr(
+            "Email already used with another sign-in method. Please log in with that method."
+          );
+        else if (code === "auth/popup-blocked")
+          setGoogleErr("Popup was blocked. Please allow popups and try again.");
+        else if (code === "auth/cancelled-popup-request")
+          setGoogleErr("Popup canceled. Try again.");
         else setGoogleErr("Unable to sign up with Google. Please try again.");
       } else {
         setGoogleErr("Unexpected error. Please try again.");
@@ -84,9 +94,12 @@ export default function SignUpModal({
     } catch (e: unknown) {
       if (e instanceof FirebaseError) {
         const code = e.code;
-        if (code === "auth/invalid-email") setEmailErr("Email address is invalid.");
-        else if (code === "auth/email-already-in-use") setFormErr("This email is already registered.");
-        else if (code === "auth/weak-password") setPasswordErr("Password is too weak.");
+        if (code === "auth/invalid-email")
+          setEmailErr("Email address is invalid.");
+        else if (code === "auth/email-already-in-use")
+          setFormErr("This email is already registered.");
+        else if (code === "auth/weak-password")
+          setPasswordErr("Password is too weak.");
         else setFormErr("Unable to sign up. Please try again.");
       } else {
         setFormErr("An unexpected error occurred. Please try again.");
@@ -102,13 +115,6 @@ export default function SignUpModal({
         className="gap-0 p-0 sm:max-w-[420px] rounded-xl"
         aria-describedby={undefined}
       >
-        <DialogClose
-          className="absolute right-4 top-4 text-zinc-500 hover:text-zinc-700"
-          aria-label="Close"
-        >
-          ✕
-        </DialogClose>
-
         <DialogHeader className="px-6 pt-8 pb-4">
           <DialogTitle className="text-center text-[20px] font-semibold text-[#032B41]">
             Sign up to Summarist
@@ -124,9 +130,13 @@ export default function SignUpModal({
             variant="default"
           >
             <FcGoogle className="text-xl bg-white rounded-[2px]" />
-            <span>{submittingGoogle ? "Signing up..." : "Sign up with Google"}</span>
+            <span>
+              {submittingGoogle ? "Signing up..." : "Sign up with Google"}
+            </span>
           </Button>
-          {googleErr && <p className="mt-2 text-sm text-red-600 text-center">{googleErr}</p>}
+          {googleErr && (
+            <p className="mt-2 text-sm text-red-600 text-center">{googleErr}</p>
+          )}
 
           <div className="my-4 flex items-center gap-3">
             <span className="h-px flex-1 bg-zinc-200" />
@@ -144,9 +154,15 @@ export default function SignUpModal({
                 setEmailErr("");
                 setFormErr("");
               }}
-              className={`h-11 rounded-md border ${emailErr ? "border-red-500 focus-visible:ring-red-500" : "border-zinc-300 focus-visible:ring-0 focus-visible:ring-offset-0"}`}
+              className={`h-11 rounded-md border ${
+                emailErr
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : "border-zinc-300 focus-visible:ring-0 focus-visible:ring-offset-0"
+              }`}
             />
-            {emailErr && <p className="mt-1 text-sm text-red-600">{emailErr}</p>}
+            {emailErr && (
+              <p className="mt-1 text-sm text-red-600">{emailErr}</p>
+            )}
           </div>
 
           <div className="mt-3">
@@ -159,12 +175,20 @@ export default function SignUpModal({
                 setPasswordErr("");
                 setFormErr("");
               }}
-              className={`h-11 rounded-md border ${passwordErr ? "border-red-500 focus-visible:ring-red-500" : "border-zinc-300 focus-visible:ring-0 focus-visible:ring-offset-0"}`}
+              className={`h-11 rounded-md border ${
+                passwordErr
+                  ? "border-red-500 focus-visible:ring-red-500"
+                  : "border-zinc-300 focus-visible:ring-0 focus-visible:ring-offset-0"
+              }`}
             />
-            {passwordErr && <p className="mt-1 text-sm text-red-600">{passwordErr}</p>}
+            {passwordErr && (
+              <p className="mt-1 text-sm text-red-600">{passwordErr}</p>
+            )}
           </div>
 
-          {formErr && <p className="mt-3 text-sm text-red-600 text-center">{formErr}</p>}
+          {formErr && (
+            <p className="mt-3 text-sm text-red-600 text-center">{formErr}</p>
+          )}
 
           <Button
             type="button"

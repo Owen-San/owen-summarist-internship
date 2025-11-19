@@ -25,6 +25,9 @@ export default function Sidebar({ variant = "desktop" }: SidebarProps) {
   const pathname = usePathname();
   const isPlayer = pathname?.startsWith("/player");
 
+  const isForYou = pathname === "/foryou" || pathname === "/";
+  const isLibrary = pathname === "/library";
+
   const [fontSize, setFontSize] = useState<FontSizeKey>(() => {
     if (typeof window === "undefined") return "md";
     const saved = window.localStorage.getItem("playerFontSize") as
@@ -76,9 +79,14 @@ export default function Sidebar({ variant = "desktop" }: SidebarProps) {
         </div>
 
         <nav className="px-4 space-y-1.5 text-[16px]">
+          {/* For you */}
           <Link
             href="/foryou"
-            className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-md bg-zinc-100 text-[#0f2a37]"
+            className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-md ${
+              isForYou
+                ? "bg-zinc-100 text-[#0f2a37]"
+                : "hover:bg-zinc-100 text-[#0f2a37]/80"
+            }`}
           >
             <span className="inline-block h-5 w-5">
               <svg viewBox="0 0 1024 1024" width="18" height="18">
@@ -91,9 +99,14 @@ export default function Sidebar({ variant = "desktop" }: SidebarProps) {
             For you
           </Link>
 
+          {/* My Library */}
           <Link
             href="/library"
-            className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-md hover:bg-zinc-100 text-[#0f2a37]/80"
+            className={`flex items-center gap-3.5 px-3.5 py-2.5 rounded-md ${
+              isLibrary
+                ? "bg-zinc-100 text-[#0f2a37]"
+                : "hover:bg-zinc-100 text-[#0f2a37]/80"
+            }`}
           >
             <span className="inline-block h-5 w-5">
               <svg viewBox="0 0 16 16" width="18" height="18">

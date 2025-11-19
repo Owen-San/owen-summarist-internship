@@ -555,6 +555,17 @@
   font-weight: 500;
 }
 
+@keyframes choose-plan-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .landing__content {
